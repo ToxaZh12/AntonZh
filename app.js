@@ -5,22 +5,27 @@ const SUPABASE_KEY = "YOUR_ANON_KEY";
 const supabase = supabasejs.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function loadUsers() {
-  const { data } = await supabase.from("users").select("*").order("id");
+  const { data, error } = await supabase.from("users").select("*").order("id");
+  if (error) console.error(error);
   return data || [];
 }
 
 async function addUser(user) {
-  await supabase.from("users").insert(user);
+  const { error } = await supabase.from("users").insert(user);
+  if (error) console.error(error);
 }
 
 async function updateUser(id, updated) {
-  await supabase.from("users").update(updated).eq("id", id);
+  const { error } = await supabase.from("users").update(updated).eq("id", id);
+  if (error) console.error(error);
 }
 
 async function deleteUser(id) {
-  await supabase.from("users").delete().eq("id", id);
+  const { error } = await supabase.from("users").delete().eq("id", id);
+  if (error) console.error(error);
 }
 
+// UI
 const form = document.getElementById("userForm");
 const tbody = document.getElementById("tableBody");
 
@@ -44,14 +49,11 @@ async function render() {
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
-
   const id = document.getElementById("userId").value;
   const name = document.getElementById("name").value;
   const email = document.getElementById("email").value;
-
   if (id) await updateUser(Number(id), { name, email });
   else await addUser({ name, email });
-
   form.reset();
   await render();
 });
